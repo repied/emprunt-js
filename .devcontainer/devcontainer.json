@@ -1,3 +1,5 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
 {
     "name": "Emprunt Dev Container",
     "build": {
@@ -5,7 +7,8 @@
         "context": ".."
     },
     "forwardPorts": [
-        5500
+        5500,
+        9323
     ],
     "customizations": {
         "vscode": {
@@ -14,7 +17,6 @@
             },
             "extensions": [
                 "ritwickdey.liveserver",
-                "kevinghadyani.vscode-colormate",
                 "usernamehw.errorlens",
                 "wayou.vscode-todo-highlight",
                 "streetsidesoftware.code-spell-checker-french",
