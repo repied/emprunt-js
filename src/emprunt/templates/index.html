@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Emprunt — Mortgage Simulator</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light' || (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+</head>
+
+<body>
+    <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+        <span class="sun">☀️</span>
+        <span class="moon">🌙</span>
+    </button>
+    <header>
+        <h1>Emprunt</h1>
+        <p>
+            Initial savings are split between down payment and investments.
+            Monthly disposable cash is split between mortgage repayments and new investment.
+        </p>
+    </header>
+
+    <main>
+        <section class="form">
+            <form method="post" action="/simulate">
+                <div class="common-block">
+                    <div class="scenario-title">Common Parameters</div>
+                    <div class="form-grid">
+                        <label>Home Cost (€)
+                            <input name="home_cost" type="text"
+                                value="{{ '{:,.0f}'.format(result1.home_cost) if result1 else '1,050,000' }}" required>
+                        </label>
+                        <label>Initial Cash (€)
+                            <input name="savings" type="text"
+                                value="{{ '{:,.0f}'.format(result1.savings) if result1 else '1,050,000' }}" required>
+                        </label>
+                        <label>Mortgage rate (%)
+                            <input name="annual_rate" type="number" step="0.01"
+                                value="{{ result1.annual_rate if result1 else 3.5 }}" required>
+                        </label>
+                        <label>Years
+                            <input name="years" type="number" value="{{ result1.years if result1 else 20 }}" required>
+                        </label>
+                        <label>Investments return (%)
+                            <input name="investment_rate" type="number" step="0.1"
+                                value="{{ result1.investment_rate if result1 else 5.0 }}" required>
+                        </label>
+                        <label>Monthly disposable cash (€)
+                            <input name="monthly_cash" type="text"
+                                value="{{ '{:,.0f}'.format(result1.monthly_cash) if result1 else '4,000' }}" required>
+                        </label>
+                        <label>Home appreciation (%)
+                            <input name="home_appreciation_rate" type="number" step="0.1"
+                                value="{{ result1.home_appreciation_rate if (result1 and result1.home_appreciation_rate is defined) else 2.0 }}"
+                                required>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="dual-grid" style="margin-top: 2rem;">
+                    <!-- Scenario A -->
+                    <div class="scenario-block">
+                        <div class="scenario-title">Scenario A</div>
+                        <div class="form-grid" style="grid-template-columns: 1fr;">
+                            <label>Down Payment (€)
+                                <input name="s1_down_payment" type="text"
+                                    value="{{ '{:,.0f}'.format(result1.down_payment) if result1 else '400,000' }}"
+                                    required>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Scenario B -->
+                    <div class="scenario-block">
+                        <div class="scenario-title">Scenario B</div>
+                        <div class="form-grid" style="grid-template-columns: 1fr;">
+                            <label>Down Payment (€)
+                                <input name="s2_down_payment" type="text"
+                                    value="{{ '{:,.0f}'.format(result2.down_payment) if result2 else '700,000' }}"
+                                    required>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" style="width: 100%; margin-top: 2rem;">Compare Scenarios</button>
+            </form>
+        </section>
+
+        {% if error %}
+        <div class="error-msg">
+            Error: {{ error }}
+        </div>
+        {% endif %}
+
+        {% if result1 and result2 and result1.schedule %}
+        <section class="result">
+            <!-- <h2>Scenario Comparison</h2> -->
+
+            <div class="dual-grid">
+                <!-- Results Scenario A -->
+                <div class="scenario-block">
+                    <div class="scenario-title">Down Payment: €{{ '{:,.0f}'.format(result1.down_payment) }}</div>
+                    <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+                        <div class="card" title="The amount you pay to the bank every month for the mortgage.">
+                            <span class="label">Monthly Payment</span>
+                            <span class="value">€{{ "{:,.0f}".format(result1.payment) }}</span>
+                        </div>
+                        <div class="card"
+                            title="The total sum of all interest payments made to the bank over the full duration of the mortgage.">
+                            <span class="label">Total Interest Cost</span>
+                            <span class="value" style="color: var(--secondary);">€{{
+                                "{:,.0f}".format(result1.total_interest / 1000) }}k</span>
+                        </div>
+                        <div class="card" title="Total gains from the investment portfolio (compounded returns).">
+                            <span class="label">Investments gain</span>
+                            <span class="value" style="color: var(--success);">€{{
+                                "{:,.0f}".format(result1.schedule[-1].investment_gains / 1000)
+                                }}k</span>
+                        </div>
+                        <div class="card"
+                            title="The estimated value of the home at the end of the term, including appreciation.">
+                            <span class="label">Final Home Value</span>
+                            <span class="value">€{{ "{:,.0f}".format(result1.schedule[-1].current_home_value / 1000)
+                                }}k</span>
+                        </div>
+                        <div class="card"
+                            title="Your total net worth after the simulation: Home Value + Investment Portfolio.">
+                            <span class="label">Final Wealth</span>
+                            <span class="value"
+                                style="color: var(--success); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem;">€{{
+                                "{:,.0f}".format(result1.schedule[-1].combined_wealth / 1000) }}k</span>
+                        </div>
+                        <div class="card"
+                            title="Total money you put into the deal: Initial Cash + (Monthly Disposable Cash × Number of Months).">
+                            <span class="label">Total Cash Injected</span>
+                            <span class="value"
+                                style="color: var(--text); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem;">€{{
+                                "{:,.0f}".format(result1.schedule[-1].total_cash_injected / 1000) }}k</span>
+                        </div>
+                    </div>
+                    <div id="wealth-plot-a" style="width:100%;height:350px;"></div>
+                </div>
+
+                <!-- Results Scenario B -->
+                <div class="scenario-block">
+                    <div class="scenario-title">Down Payment: €{{ '{:,.0f}'.format(result2.down_payment) }}</div>
+                    <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+                        <div class="card" title="The amount you pay to the bank every month for the mortgage.">
+                            <span class="label">Monthly Payment</span>
+                            <span class="value">€{{ "{:,.0f}".format(result2.payment) }}</span>
+                        </div>
+                        <div class="card"
+                            title="The total sum of all interest payments made to the bank over the full duration of the mortgage.">
+                            <span class="label">Total Interest Cost</span>
+                            <span class="value" style="color: var(--secondary);">€{{
+                                "{:,.0f}".format(result2.total_interest / 1000) }}k</span>
+                        </div>
+                        <div class="card" title="Total gains from the investment portfolio (compounded returns).">
+                            <span class="label">Investments gain</span>
+                            <span class="value" style="color: var(--success);">€{{
+                                "{:,.0f}".format(result2.schedule[-1].investment_gains / 1000)
+                                }}k</span>
+                        </div>
+                        <div class="card"
+                            title="The estimated value of the home at the end of the term, including appreciation.">
+                            <span class="label">Final Home Value</span>
+                            <span class="value">€{{ "{:,.0f}".format(result2.schedule[-1].current_home_value / 1000)
+                                }}k</span>
+                        </div>
+                        <div class="card"
+                            title="Your total net worth after the simulation: Home Value + Investment Portfolio.">
+                            <span class="label">Final Wealth</span>
+                            <span class="value"
+                                style="color: var(--success); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem;">€{{
+                                "{:,.0f}".format(result2.schedule[-1].combined_wealth / 1000) }}k</span>
+                        </div>
+                        <div class="card"
+                            title="Total money you put into the deal: Initial Cash + (Monthly Disposable Cash × Number of Months).">
+                            <span class="label">Total Cash Injected</span>
+                            <span class="value"
+                                style="color: var(--text); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem;">€{{
+                                "{:,.0f}".format(result2.schedule[-1].total_cash_injected / 1000) }}k</span>
+                        </div>
+                    </div>
+                    <div id="wealth-plot-b" style="width:100%;height:350px;"></div>
+                </div>
+            </div>
+
+
+        </section>
+
+        <script>
+            (function () {
+                const s1 = {{ (result1.schedule if result1 and result1.schedule else[]) | tojson | safe
+            }};
+            const s2 = {{ (result2.schedule if result2 and result2.schedule else[]) | tojson | safe }};
+            const dp1 = "€" + ({{ (result1.down_payment if result1 else 0) | tojson }}).toLocaleString();
+            const dp2 = "€" + ({{ (result2.down_payment if result2 else 0) | tojson }}).toLocaleString();
+
+            const periods = s1.map(row => row.period);
+
+            function getThemeColors() {
+                const styles = getComputedStyle(document.documentElement);
+                return {
+                    text: styles.getPropertyValue('--text').trim(),
+                    muted: styles.getPropertyValue('--text-muted').trim(),
+                    grid: styles.getPropertyValue('--plot-grid').trim()
+                };
+            }
+
+            const colors = getThemeColors();
+
+            // Common layout settings
+            const commonLayout = () => ({
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { family: 'Inter' }
+            });
+
+
+            // Individual Plots
+            const createIndividualPlot = (id, data, title, yMax) => {
+                const currentColors = getThemeColors();
+
+                const traceInvestedCash = {
+                    x: periods, y: data.map(row => row.invested_cash_net),
+                    name: 'Invested Cash (Net)', stackgroup: 'one',
+                    line: { color: '#6366f1', width: 2 },
+                    fillcolor: 'rgba(99, 102, 241, 0.4)'
+                };
+                const traceAppreciation = {
+                    x: periods, y: data.map(row => row.home_appreciation),
+                    name: 'Home Appreciation', stackgroup: 'one',
+                    line: { color: '#f59e0b', width: 2 },
+                    fillcolor: 'rgba(245, 158, 11, 0.3)'
+                };
+                const traceGains = {
+                    x: periods, y: data.map(row => row.investment_gains),
+                    name: 'Invest. Gains', stackgroup: 'one',
+                    line: { color: '#10b981', width: 2 },
+                    fillcolor: 'rgba(16, 185, 129, 0.3)'
+                };
+
+                const layout = {
+                    ...commonLayout(),
+                    title: { text: title, font: { size: 16, color: currentColors.text } },
+                    xaxis: { title: 'Months', gridcolor: currentColors.grid, tickfont: { color: currentColors.muted } },
+                    yaxis: {
+                        tickprefix: '€',
+                        exponentformat: 'SI',
+                        gridcolor: currentColors.grid,
+                        tickfont: { color: currentColors.muted },
+                        range: [0, yMax * 1.05]
+                    },
+                    margin: { t: 40, b: 40, l: 60, r: 20 },
+                    showlegend: true,
+                    legend: { font: { size: 10, color: currentColors.text }, orientation: 'h', y: -0.3 }
+                };
+                Plotly.newPlot(id, [traceInvestedCash, traceAppreciation, traceGains], layout, { responsive: true, displayModeBar: false });
+            };
+
+            const maxWealth1 = s1.length > 0 ? s1[s1.length - 1].combined_wealth : 0;
+            const maxWealth2 = s2.length > 0 ? s2[s2.length - 1].combined_wealth : 0;
+            const commonYMax = Math.max(maxWealth1, maxWealth2);
+
+            createIndividualPlot('wealth-plot-a', s1, 'Wealth Decomposition (Scenario A)', commonYMax);
+            createIndividualPlot('wealth-plot-b', s2, 'Wealth Decomposition (Scenario B)', commonYMax);
+
+            // Theme Toggle Logic
+            const toggle = document.getElementById('theme-toggle');
+            toggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+
+                // Update Plots
+                const newColors = getThemeColors();
+                const update = {
+                    'title.font.color': newColors.text,
+                    'xaxis.tickfont.color': newColors.muted,
+                    'xaxis.gridcolor': newColors.grid,
+                    'yaxis.tickfont.color': newColors.muted,
+                    'yaxis.gridcolor': newColors.grid,
+                    'legend.font.color': newColors.text
+                };
+
+                Plotly.relayout('wealth-plot-a', update);
+                Plotly.relayout('wealth-plot-b', update);
+            });
+            }) ();
+        </script>
+        {% endif %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Emprunt.</p>
+    </footer>
+</body>
+
+</html>

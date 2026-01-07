@@ -1,0 +1,35 @@
+{
+    "name": "Emprunt Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "forwardPorts": [
+        8000
+    ],
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.shell.linux": "/bin/bash"
+            },
+            "extensions": [
+                "ms-python.python",
+                "ms-toolsai.jupyter",
+                "earshinov.filter-lines",
+                "kevinghadyani.vscode-colormate",
+                "usernamehw.errorlens",
+                "wayou.vscode-todo-highlight",
+                "streetsidesoftware.code-spell-checker-french",
+                "streetsidesoftware.code-spell-checker"
+                // "github.copilot-chat",
+                // "github.copilot",
+                // "github.vscode-pull-request-github",
+                // "github.vscode-github-actions",
+                // "johnpapa.vscode-peacock",
+                // "wmaurer.vscode-jumpy"
+            ]
+        }
+    },
+    "postCreateCommand": "python -m pip install -e .",
+    "remoteUser": "vscode"
+}
