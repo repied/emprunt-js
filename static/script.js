@@ -20,7 +20,7 @@ function simulateMortgage(homeCost, downPayment, annualRate, years, savings, inv
     }
 
     if (payment > monthlyCash) {
-        throw new Error(`Monthly payment (€${payment.toLocaleString(undefined, { maximumFractionDigits: 0 })}) exceeds disposable monthly cash (€${monthlyCash.toLocaleString(undefined, { maximumFractionDigits: 0 })})`);
+        throw new Error(`Monthly payment (€${payment.toLocaleString(undefined, { maximumFractionDigits: 0 })}) exceeds monthly cash (€${monthlyCash.toLocaleString(undefined, { maximumFractionDigits: 0 })})`);
     }
 
     if (savings < downPayment) {

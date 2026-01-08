@@ -32,7 +32,7 @@
         <h1>Emprunt</h1>
         <p>
             Initial savings are split between down payment and investments.
-            <br>Monthly disposable cash is split between mortgage repayments and new investment.
+            <br>Monthly cash is split between mortgage repayments and new investment.
         </p>
     </header>
 
@@ -43,25 +43,22 @@
                     <!-- <div class="scenario-title">Common Parameters</div> -->
                     <div class="form-grid">
                         <label>Home Cost (€)
-                            <input name="home_cost" type="text" value="1,050,000" required>
+                            <input name="home_cost" type="text" value="1,053,000" required>
                         </label>
-                        <label>Initial Cash (€)
-                            <input name="savings" type="text" value="1,050,000" required>
-                        </label>
-                        <label>Mortgage rate (%)
-                            <input name="annual_rate" type="number" step="0.01" value="3.5" required>
+                        <label>Initial savings (€)
+                            <input name="savings" type="text" value="987,000" required>
                         </label>
                         <label>Years
                             <input name="years" type="number" value="20" required>
                         </label>
                         <label>Investments return (%)
-                            <input name="investment_rate" type="number" step="0.1" value="5.0" required>
+                            <input name="investment_rate" type="number" step="0.1" value="10.0" required>
                         </label>
-                        <label>Monthly disposable cash (€)
-                            <input name="monthly_cash" type="text" value="4,000" required>
+                        <label>Monthly cash (€)
+                            <input name="monthly_cash" type="text" value="5,000" required>
                         </label>
                         <label>Home appreciation (%)
-                            <input name="home_appreciation_rate" type="number" step="0.1" value="2.0" required>
+                            <input name="home_appreciation_rate" type="number" step="0.1" value="0.0" required>
                         </label>
                     </div>
                 </div>
@@ -72,7 +69,10 @@
                         <div class="scenario-title">Scenario A</div>
                         <div class="form-grid" style="grid-template-columns: 1fr;">
                             <label>Down Payment (€)
-                                <input name="s1_down_payment" type="text" value="400,000" required>
+                                <input name="s1_down_payment" type="text" value="548,000" required>
+                            </label>
+                            <label>Mortgage rate (%)
+                                <input name="s1_annual_rate" type="number" step="0.01" value="2.8" required>
                             </label>
                         </div>
                     </div>
@@ -82,7 +82,10 @@
                         <div class="scenario-title">Scenario B</div>
                         <div class="form-grid" style="grid-template-columns: 1fr;">
                             <label>Down Payment (€)
-                                <input name="s2_down_payment" type="text" value="700,000" required>
+                                <input name="s2_down_payment" type="text" value="623,000" required>
+                            </label>
+                            <label>Mortgage rate (%)
+                                <input name="s2_annual_rate" type="number" step="0.01" value="3.05" required>
                             </label>
                         </div>
                     </div>
@@ -103,7 +106,7 @@
             <div class="dual-grid">
                 <!-- Results Scenario A -->
                 <div class="scenario-block">
-                    <div class="scenario-title">Down Payment: <span id="s1-down-payment-title"></span></div>
+                    <div class="scenario-title">Mortgage Principal: <span id="s1-principal-title"></span></div>
                     <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
                         <div class="card" title="The amount you pay to the bank every month for the mortgage.">
                             <span class="label">Monthly Payment</span>
@@ -131,7 +134,7 @@
                                 id="s1-final-wealth"></span>
                         </div>
                         <div class="card"
-                            title="Total money you put into the deal: Initial Cash + (Monthly Disposable Cash × Number of Months).">
+                            title="Total money you put into the deal: Initial Savings + (Monthly Cash × Number of Months).">
                             <span class="label">Total Cash Injected</span>
                             <span class="value"
                                 style="color: var(--text); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem;"
@@ -143,7 +146,7 @@
 
                 <!-- Results Scenario B -->
                 <div class="scenario-block">
-                    <div class="scenario-title">Down Payment: <span id="s2-down-payment-title"></span></div>
+                    <div class="scenario-title">Mortgage Principal: <span id="s2-principal-title"></span></div>
                     <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
                         <div class="card" title="The amount you pay to the bank every month for the mortgage.">
                             <span class="label">Monthly Payment</span>
@@ -171,7 +174,7 @@
                                 id="s2-final-wealth"></span>
                         </div>
                         <div class="card"
-                            title="Total money you put into the deal: Initial Cash + (Monthly Disposable Cash × Number of Months).">
+                            title="Total money you put into the deal: Initial Savings + (Monthly Cash × Number of Months).">
                             <span class="label">Total Cash Injected</span>
                             <span class="value"
                                 style="color: var(--text); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem;"
@@ -219,16 +222,17 @@
                     try {
                         const homeCost = cleanMoney(data.home_cost);
                         const savings = cleanMoney(data.savings);
-                        const annualRate = parseFloat(data.annual_rate);
                         const years = parseInt(data.years, 10);
                         const investmentRate = parseFloat(data.investment_rate);
                         const monthlyCash = cleanMoney(data.monthly_cash);
                         const homeAppreciationRate = parseFloat(data.home_appreciation_rate);
                         const s1DownPayment = cleanMoney(data.s1_down_payment);
                         const s2DownPayment = cleanMoney(data.s2_down_payment);
+                        const s1AnnualRate = parseFloat(data.s1_annual_rate);
+                        const s2AnnualRate = parseFloat(data.s2_annual_rate);
 
-                        const result1 = simulateMortgage(homeCost, s1DownPayment, annualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate);
-                        const result2 = simulateMortgage(homeCost, s2DownPayment, annualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate);
+                        const result1 = simulateMortgage(homeCost, s1DownPayment, s1AnnualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate);
+                        const result2 = simulateMortgage(homeCost, s2DownPayment, s2AnnualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate);
 
                         document.getElementById('error-msg').style.display = 'none';
                         document.getElementById('result-section').style.display = 'block';
@@ -253,7 +257,7 @@
 
                     const formatK = (value) => `${formatCurrency(value, '€', 1000)}k`;
 
-                    document.getElementById(`${prefix}-down-payment-title`).innerText = formatCurrency(result.down_payment);
+                    document.getElementById(`${prefix}-principal-title`).innerText = formatCurrency(result.principal);
                     document.getElementById(`${prefix}-monthly-payment`).innerText = formatCurrency(result.payment);
                     document.getElementById(`${prefix}-total-interest`).innerText = formatK(result.total_interest);
                     document.getElementById(`${prefix}-investment-gains`).innerText = formatK(result.schedule[result.schedule.length - 1].investment_gains);
