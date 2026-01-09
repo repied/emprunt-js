@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="./static/favicon.ico">
     <script>
         (function () {
             const savedTheme = localStorage.getItem('theme');
@@ -31,8 +31,8 @@
     <header>
         <h1>Emprunt</h1>
         <p>
-            Initial savings are split between down payment and investments.
-            <br>Monthly cash is split between mortgage repayments and new investment.
+            Initial savings are split between down payment and investments.<br>
+            Monthly cash is split between mortgage repayments and new investment.
         </p>
     </header>
 
@@ -64,9 +64,9 @@
                 </div>
 
                 <div class="dual-grid" style="margin-top: 2rem;">
-                    <!-- Scenario A -->
+                    <!-- Scenario 1 -->
                     <div class="scenario-block">
-                        <div class="scenario-title">Scenario A</div>
+                        <div class="scenario-title">Scenario 1</div>
                         <div class="form-grid" style="grid-template-columns: 1fr;">
                             <label>Down Payment (€)
                                 <input name="s1_down_payment" type="text" value="548,000" required>
@@ -77,9 +77,9 @@
                         </div>
                     </div>
 
-                    <!-- Scenario B -->
+                    <!-- Scenario 2 -->
                     <div class="scenario-block">
-                        <div class="scenario-title">Scenario B</div>
+                        <div class="scenario-title">Scenario 2</div>
                         <div class="form-grid" style="grid-template-columns: 1fr;">
                             <label>Down Payment (€)
                                 <input name="s2_down_payment" type="text" value="623,000" required>
@@ -104,7 +104,7 @@
             <!-- <h2>Scenario Comparison</h2> -->
 
             <div class="dual-grid">
-                <!-- Results Scenario A -->
+                <!-- Results Scenario 1 -->
                 <div class="scenario-block">
                     <div class="scenario-title">Mortgage Principal: <span id="s1-principal-title"></span></div>
                     <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
@@ -141,10 +141,10 @@
                                 id="s1-total-cash-injected"></span>
                         </div>
                     </div>
-                    <div id="wealth-plot-a" style="width:100%;height:350px;"></div>
+                    <div id="wealth-plot-1" style="width:100%;height:350px;"></div>
                 </div>
 
-                <!-- Results Scenario B -->
+                <!-- Results Scenario 2 -->
                 <div class="scenario-block">
                     <div class="scenario-title">Mortgage Principal: <span id="s2-principal-title"></span></div>
                     <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
@@ -181,7 +181,7 @@
                                 id="s2-total-cash-injected"></span>
                         </div>
                     </div>
-                    <div id="wealth-plot-b" style="width:100%;height:350px;"></div>
+                    <div id="wealth-plot-2" style="width:100%;height:350px;"></div>
                 </div>
             </div>
 
@@ -324,8 +324,8 @@
                     const maxWealth2 = s2.length > 0 ? s2[s2.length - 1].combined_wealth : 0;
                     const commonYMax = Math.max(maxWealth1, maxWealth2);
 
-                    createIndividualPlot('wealth-plot-a', s1, 'Wealth Decomposition (Scenario A)', commonYMax);
-                    createIndividualPlot('wealth-plot-b', s2, 'Wealth Decomposition (Scenario B)', commonYMax);
+                    createIndividualPlot('wealth-plot-1', s1, 'Wealth Decomposition (Scenario 1)', commonYMax);
+                    createIndividualPlot('wealth-plot-2', s2, 'Wealth Decomposition (Scenario 2)', commonYMax);
                 }
                 // Trigger initial simulation on page load
                 form.dispatchEvent(new Event('submit', { cancelable: true }));
