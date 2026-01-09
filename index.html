@@ -348,64 +348,89 @@
                 }
 
                 function plotResults(result1, result2) {
-                    const s1 = result1.schedule;
-                    const s2 = result2.schedule;
-                    const periods = s1.map(row => row.period);
 
                     function getThemeColors() {
                         const styles = getComputedStyle(document.documentElement);
                         return {
                             text: styles.getPropertyValue('--text').trim(),
                             muted: styles.getPropertyValue('--text-muted').trim(),
-                            grid: styles.getPropertyValue('--plot-grid').trim()
+                            grid: styles.getPropertyValue('--plot-grid').trim(),
+                            green: styles.getPropertyValue('--success').trim(),
+                            red: styles.getPropertyValue('--secondary').trim(),
+                            primary: styles.getPropertyValue('--primary').trim(),
                         };
                     }
 
-                    const createIndividualPlot = (id, data, yMax) => {
+                    const createIndividualPlot = (id, result) => {
                         const currentColors = getThemeColors();
-                        const traceInvestedCash = {
-                            x: periods, y: data.map(row => row.invested_cash_net),
-                            name: 'Invested Cash (Net)', stackgroup: 'one',
-                            line: { color: '#6366f1', width: 2 },
-                            fillcolor: 'rgba(99, 102, 241, 0.4)'
-                        };
-                        const traceAppreciation = {
-                            x: periods, y: data.map(row => row.home_appreciation),
-                            name: 'Home Appreciation', stackgroup: 'one',
+                        const schedule = result.schedule;
+
+                        // Prepare data with T=0
+                        const periods = [0, ...schedule.map(r => r.period)];
+
+                        const homeValues = [0, ...schedule.map(r => r.current_home_value)];
+                        // At T=0, investment is the savings.
+                        const investmentValues = [result.savings, ...schedule.map(r => r.investment_portfolio)];
+                        // At T=0, liability is 0 (before purchase).
+                        const liabilityValues = [0, ...schedule.map(r => -r.balance)]; // Negative for liability
+
+                        const netWealthValues = [result.savings, ...schedule.map(r => r.combined_wealth)];
+
+                        const traceHome = {
+                            x: periods, y: homeValues,
+                            name: 'Home Value',
+                            type: 'scatter',
+                            stackgroup: 'assets',
                             line: { color: '#f59e0b', width: 2 },
                             fillcolor: 'rgba(245, 158, 11, 0.3)'
                         };
-                        const traceGains = {
-                            x: periods, y: data.map(row => row.investment_gains),
-                            name: 'Invest. Gains', stackgroup: 'one',
-                            line: { color: '#10b981', width: 2 },
+
+                        const traceInvest = {
+                            x: periods, y: investmentValues,
+                            name: 'Investments',
+                            type: 'scatter',
+                            stackgroup: 'assets',
+                            line: { color: currentColors.green, width: 2 },
                             fillcolor: 'rgba(16, 185, 129, 0.3)'
                         };
+
+                        const traceLiability = {
+                            x: periods, y: liabilityValues,
+                            name: 'Mortgage',
+                            type: 'scatter',
+                            line: { color: currentColors.red, width: 2, },
+                            fill: 'tozeroy'
+                        };
+
+                        const traceWealth = {
+                            x: periods, y: netWealthValues,
+                            name: 'Net Wealth',
+                            type: 'scatter',
+                            line: { color: currentColors.text, width: 3 },
+                        };
+
                         const layout = {
                             paper_bgcolor: 'rgba(0,0,0,0)',
                             plot_bgcolor: 'rgba(0,0,0,0)',
                             font: { family: 'Inter' },
-                            xaxis: { title: 'Months', gridcolor: currentColors.grid, tickfont: { color: currentColors.muted } },
+                            // xaxis: { title: 'Months', gridcolor: currentColors.grid, tickfont: { color: currentColors.muted } },
                             yaxis: {
                                 tickprefix: '€',
                                 exponentformat: 'SI',
                                 gridcolor: currentColors.grid,
                                 tickfont: { color: currentColors.muted },
-                                range: [0, yMax * 1.05]
                             },
                             margin: { t: 40, b: 40, l: 60, r: 20 },
                             showlegend: true,
-                            legend: { font: { size: 10, color: currentColors.text }, orientation: 'h', y: -0.3 }
+                            legend: { font: { size: 10, color: currentColors.text }, orientation: 'h', y: -0.2 },
+                            hovermode: 'x unified'
                         };
-                        Plotly.newPlot(id, [traceInvestedCash, traceAppreciation, traceGains], layout, { responsive: true, displayModeBar: false });
+
+                        Plotly.newPlot(id, [traceHome, traceInvest, traceLiability, traceWealth], layout, { responsive: true, displayModeBar: false });
                     };
 
-                    const maxWealth1 = s1.length > 0 ? s1[s1.length - 1].combined_wealth : 0;
-                    const maxWealth2 = s2.length > 0 ? s2[s2.length - 1].combined_wealth : 0;
-                    const commonYMax = Math.max(maxWealth1, maxWealth2);
-
-                    createIndividualPlot('wealth-plot-1', s1, commonYMax);
-                    createIndividualPlot('wealth-plot-2', s2, commonYMax);
+                    createIndividualPlot('wealth-plot-1', result1);
+                    createIndividualPlot('wealth-plot-2', result2);
                 }
                 // Trigger initial simulation on page load
                 form.dispatchEvent(new Event('submit', { cancelable: true }));
