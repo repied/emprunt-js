@@ -52,7 +52,7 @@
                             <input name="years" type="number" value="20" required>
                         </label>
                         <label>Investments return (%)
-                            <input name="investment_rate" type="number" step="0.1" value="10.0" required>
+                            <input name="investment_rate" type="number" step="0.1" value="5.0" required>
                         </label>
                         <label>Monthly cash (€)
                             <input name="monthly_cash" type="text" value="5,000" required>
@@ -75,7 +75,7 @@
                                 <input name="s1_annual_rate" type="number" step="0.01" value="2.8" required>
                             </label>
                             <label>Monthly fees (€)
-                                <input name="s1_monthly_fees" type="text" value="0" required>
+                                <input name="s1_monthly_fees" type="text" value="668" required>
                             </label>
                         </div>
                     </div>
@@ -91,7 +91,7 @@
                                 <input name="s2_annual_rate" type="number" step="0.01" value="3.05" required>
                             </label>
                             <label>Monthly fees (€)
-                                <input name="s2_monthly_fees" type="text" value="0" required>
+                                <input name="s2_monthly_fees" type="text" value="650" required>
                             </label>
                         </div>
                     </div>
@@ -113,88 +113,128 @@
                 <!-- Results Scenario 1 -->
                 <div class="scenario-block">
                     <div class="scenario-title">Mortgage Principal: <span id="s1-principal-title"></span></div>
+
+                    <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; opacity: 0.8;">Monthly</h4>
                     <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
                         <div class="card" title="The amount you pay to the bank every month for the mortgage.">
-                            <span class="label">Monthly Payment</span>
+                            <span class="label">Mortgage</span>
                             <span class="value" id="s1-monthly-payment"></span>
                         </div>
+                        <div class="card" title="Mortgage payment plus additional monthly fees.">
+                            <span class="label">Mortgage + Fees</span>
+                            <span class="value" id="s1-monthly-payment-fees"></span>
+                        </div>
                         <div class="card"
-                            title="The total sum of all interest payments made to the bank over the full duration of the mortgage.">
-                            <span class="label">Total Interest Cost</span>
-                            <span class="value" style="color: var(--secondary);" id="s1-total-interest"></span>
+                            title="Money left from monthly cash after payment and fees, added to investment.">
+                            <span class="label">Investment</span>
+                            <span class="value" id="s1-monthly-invested"></span>
                         </div>
-                        <div class="card" title="Total sum of monthly fees paid over the duration.">
-                            <span class="label">Total Fees</span>
-                            <span class="value" style="color: var(--secondary);" id="s1-total-fees"></span>
-                        </div>
-                        <div class="card" title="Total gains from the investment portfolio (compounded returns).">
-                            <span class="label">Investments gain</span>
-                            <span class="value" style="color: var(--success);" id="s1-investment-gains"></span>
+                    </div>
+
+                    <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; opacity: 0.8;">Final State</h4>
+                    <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+                        <div class="card"
+                            title="Your total net worth after the simulation: Home Value + Investment Portfolio.">
+                            <span class="label">Wealth</span>
+                            <span class="value" style="color: var(--success);" id="s1-final-wealth"></span>
                         </div>
                         <div class="card"
                             title="The estimated value of the home at the end of the term, including appreciation.">
-                            <span class="label">Final Home Value</span>
+                            <span class="label">Home</span>
                             <span class="value" id="s1-final-home-value"></span>
                         </div>
-                        <div class="card"
-                            title="Your total net worth after the simulation: Home Value + Investment Portfolio.">
-                            <span class="label">Final Wealth</span>
-                            <span class="value"
-                                style="color: var(--success); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem;"
-                                id="s1-final-wealth"></span>
-                        </div>
-                        <div class="card"
-                            title="Total money you put into the deal: Initial Savings + (Monthly Cash × Number of Months).">
-                            <span class="label">Total Cash Injected</span>
-                            <span class="value"
-                                style="color: var(--text); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem;"
-                                id="s1-total-cash-injected"></span>
+                        <div class="card" title="Total value of the investment portfolio at the end.">
+                            <span class="label">Investments</span>
+                            <span class="value" style="color: var(--success);" id="s1-final-invest-value"></span>
                         </div>
                     </div>
+
+                    <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; opacity: 0.8;">Total Flows</h4>
+                    <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+                        <div class="card"
+                            title="Total money you put into the deal: Initial Savings + (Monthly Cash × Number of Months).">
+                            <span class="label">Savings + Cash</span>
+                            <span class="value" id="s1-total-cash-injected"></span>
+                        </div>
+                        <div class="card"
+                            title="The total sum of all interest payments made to the bank over the full duration of the mortgage.">
+                            <span class="label">Interests paid</span>
+                            <span class="value" style="color: var(--secondary);" id="s1-total-interest"></span>
+                        </div>
+                        <div class="card" title="Total sum of monthly fees paid over the duration.">
+                            <span class="label">Fees paid</span>
+                            <span class="value" style="color: var(--secondary);" id="s1-total-fees"></span>
+                        </div>
+                        <div class="card" title="Total gains from the investment portfolio (compounded returns).">
+                            <span class="label">Investments Gain</span>
+                            <span class="value" style="color: var(--success);" id="s1-total-invest-gain"></span>
+                        </div>
+                    </div>
+
                     <div id="wealth-plot-1" style="width:100%;height:350px;"></div>
                 </div>
 
                 <!-- Results Scenario 2 -->
                 <div class="scenario-block">
                     <div class="scenario-title">Mortgage Principal: <span id="s2-principal-title"></span></div>
+
+                    <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; opacity: 0.8;">Monthly</h4>
                     <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
                         <div class="card" title="The amount you pay to the bank every month for the mortgage.">
-                            <span class="label">Monthly Payment</span>
+                            <span class="label">Mortgage</span>
                             <span class="value" id="s2-monthly-payment"></span>
                         </div>
+                        <div class="card" title="Mortgage payment plus additional monthly fees.">
+                            <span class="label">Mortgage + Fees</span>
+                            <span class="value" id="s2-monthly-payment-fees"></span>
+                        </div>
                         <div class="card"
-                            title="The total sum of all interest payments made to the bank over the full duration of the mortgage.">
-                            <span class="label">Total Interest Cost</span>
-                            <span class="value" style="color: var(--secondary);" id="s2-total-interest"></span>
+                            title="Money left from monthly cash after payment and fees, added to investment.">
+                            <span class="label">Investment</span>
+                            <span class="value" id="s2-monthly-invested"></span>
                         </div>
-                        <div class="card" title="Total sum of monthly fees paid over the duration.">
-                            <span class="label">Total Fees</span>
-                            <span class="value" style="color: var(--secondary);" id="s2-total-fees"></span>
-                        </div>
-                        <div class="card" title="Total gains from the investment portfolio (compounded returns).">
-                            <span class="label">Investments gain</span>
-                            <span class="value" style="color: var(--success);" id="s2-investment-gains"></span>
+                    </div>
+
+                    <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; opacity: 0.8;">Final State</h4>
+                    <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+                        <div class="card"
+                            title="Your total net worth after the simulation: Home Value + Investment Portfolio.">
+                            <span class="label">Wealth</span>
+                            <span class="value" style="color: var(--success);" id="s2-final-wealth"></span>
                         </div>
                         <div class="card"
                             title="The estimated value of the home at the end of the term, including appreciation.">
-                            <span class="label">Final Home Value</span>
+                            <span class="label">Home</span>
                             <span class="value" id="s2-final-home-value"></span>
                         </div>
-                        <div class="card"
-                            title="Your total net worth after the simulation: Home Value + Investment Portfolio.">
-                            <span class="label">Final Wealth</span>
-                            <span class="value"
-                                style="color: var(--success); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem;"
-                                id="s2-final-wealth"></span>
-                        </div>
-                        <div class="card"
-                            title="Total money you put into the deal: Initial Savings + (Monthly Cash × Number of Months).">
-                            <span class="label">Total Cash Injected</span>
-                            <span class="value"
-                                style="color: var(--text); border-top: 1px solid var(--border); padding-top: 0.5rem; margin-top: 0.5rem;"
-                                id="s2-total-cash-injected"></span>
+                        <div class="card" title="Total value of the investment portfolio at the end.">
+                            <span class="label">Investments</span>
+                            <span class="value" style="color: var(--success);" id="s2-final-invest-value"></span>
                         </div>
                     </div>
+
+                    <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; opacity: 0.8;">Total Flows</h4>
+                    <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+                        <div class="card"
+                            title="Total money you put into the deal: Initial Savings + (Monthly Cash × Number of Months).">
+                            <span class="label">Savings + Cash</span>
+                            <span class="value" id="s2-total-cash-injected"></span>
+                        </div>
+                        <div class="card"
+                            title="The total sum of all interest payments made to the bank over the full duration of the mortgage.">
+                            <span class="label">Interests paid</span>
+                            <span class="value" style="color: var(--secondary);" id="s2-total-interest"></span>
+                        </div>
+                        <div class="card" title="Total sum of monthly fees paid over the duration.">
+                            <span class="label">Fees paid</span>
+                            <span class="value" style="color: var(--secondary);" id="s2-total-fees"></span>
+                        </div>
+                        <div class="card" title="Total gains from the investment portfolio (compounded returns).">
+                            <span class="label">Investments Gain</span>
+                            <span class="value" style="color: var(--success);" id="s2-total-invest-gain"></span>
+                        </div>
+                    </div>
+
                     <div id="wealth-plot-2" style="width:100%;height:350px;"></div>
                 </div>
             </div>
@@ -273,14 +313,25 @@
 
                     const formatK = (value) => `${formatCurrency(value, '€', 1000)}k`;
 
+                    // Monthly
                     document.getElementById(`${prefix}-principal-title`).innerText = formatCurrency(result.principal);
                     document.getElementById(`${prefix}-monthly-payment`).innerText = formatCurrency(result.payment);
+                    document.getElementById(`${prefix}-monthly-payment-fees`).innerText = formatCurrency(result.payment + result.monthly_fees);
+                    // Monthly invested = monthly_cash - (payment + fees)
+                    const monthlyInvested = result.monthly_cash - (result.payment + result.monthly_fees);
+                    document.getElementById(`${prefix}-monthly-invested`).innerText = formatCurrency(monthlyInvested);
+
+                    // Final State
+                    const finalState = result.schedule[result.schedule.length - 1];
+                    document.getElementById(`${prefix}-final-wealth`).innerText = formatK(finalState.combined_wealth);
+                    document.getElementById(`${prefix}-final-home-value`).innerText = formatK(finalState.current_home_value);
+                    document.getElementById(`${prefix}-final-invest-value`).innerText = formatK(finalState.investment_portfolio);
+
+                    // Total Flows
                     document.getElementById(`${prefix}-total-interest`).innerText = formatK(result.total_interest);
                     document.getElementById(`${prefix}-total-fees`).innerText = formatK(result.total_fees);
-                    document.getElementById(`${prefix}-investment-gains`).innerText = formatK(result.schedule[result.schedule.length - 1].investment_gains);
-                    document.getElementById(`${prefix}-final-home-value`).innerText = formatK(result.schedule[result.schedule.length - 1].current_home_value);
-                    document.getElementById(`${prefix}-final-wealth`).innerText = formatK(result.schedule[result.schedule.length - 1].combined_wealth);
-                    document.getElementById(`${prefix}-total-cash-injected`).innerText = formatK(result.schedule[result.schedule.length - 1].total_cash_injected);
+                    document.getElementById(`${prefix}-total-invest-gain`).innerText = formatK(finalState.investment_gains);
+                    document.getElementById(`${prefix}-total-cash-injected`).innerText = formatK(finalState.total_cash_injected);
                 }
 
                 function plotResults(result1, result2) {
