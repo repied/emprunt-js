@@ -1,5 +1,5 @@
-function simulateMortgage(homeCost, downPayment, annualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate, monthlyFees = 0, paymentsPerYear = 12) {
-    const principal = homeCost - downPayment;
+function simulateMortgage(homeCost, downPayment, annualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate, monthlyFees = 0, buyingFees = 0, paymentsPerYear = 12) {
+    const principal = homeCost + buyingFees - downPayment;
     if (principal < 0) {
         throw new Error("Down payment cannot exceed home cost");
     }
@@ -23,11 +23,12 @@ function simulateMortgage(homeCost, downPayment, annualRate, years, savings, inv
         throw new Error(`Monthly payment (€${payment.toLocaleString(undefined, { maximumFractionDigits: 0 })}) + fees (€${monthlyFees.toLocaleString(undefined, { maximumFractionDigits: 0 })}) exceeds monthly cash (€${monthlyCash.toLocaleString(undefined, { maximumFractionDigits: 0 })})`);
     }
 
-    if (savings < downPayment) {
-        throw new Error(`Savings (€${savings.toLocaleString(undefined, { maximumFractionDigits: 0 })}) cannot be less than down payment (€${downPayment.toLocaleString(undefined, { maximumFractionDigits: 0 })})`);
+    const initialOutlay = downPayment + buyingFees;
+    if (savings < initialOutlay) {
+        throw new Error(`Savings (€${savings.toLocaleString(undefined, { maximumFractionDigits: 0 })}) cannot cover down payment + buying fees (€${initialOutlay.toLocaleString(undefined, { maximumFractionDigits: 0 })})`);
     }
 
-    let investmentPortfolio = savings - downPayment;
+    let investmentPortfolio = savings - initialOutlay;
     let portfolioCapital = investmentPortfolio;
     let balance = principal;
     let cumulativeInterest = 0.0;
@@ -87,6 +88,7 @@ function simulateMortgage(homeCost, downPayment, annualRate, years, savings, inv
         monthly_cash: monthlyCash,
         home_appreciation_rate: homeAppreciationRate,
         monthly_fees: monthlyFees,
+        buying_fees: buyingFees,
         payment: parseFloat(payment.toFixed(2)),
         total_interest: parseFloat(cumulativeInterest.toFixed(2)),
         total_fees: parseFloat(cumulativeFees.toFixed(2)),

@@ -42,23 +42,26 @@
                 <div class="common-block">
                     <!-- <div class="scenario-title">Common Parameters</div> -->
                     <div class="form-grid">
-                        <label>Home Cost (€)
-                            <input name="home_cost" type="text" value="1,053,000" required>
+                        <label>Home + Works (€)
+                            <input name="home_cost" type="text" value="934,000" required>
                         </label>
-                        <label>Initial savings (€)
+                        <label>Taxes + Fees (€)
+                            <input name="buying_fees" type="text" value="119,000" required>
+                        </label>
+                        <label>Savings (€)
                             <input name="savings" type="text" value="987,000" required>
                         </label>
                         <label>Years
                             <input name="years" type="number" value="20" required>
                         </label>
-                        <label>Investments return (%)
-                            <input name="investment_rate" type="number" step="0.1" value="5.0" required>
-                        </label>
                         <label>Monthly cash (€)
                             <input name="monthly_cash" type="text" value="5,000" required>
                         </label>
+                        <label>Investments return (%)
+                            <input name="investment_rate" type="number" step="0.1" value="5.0" required>
+                        </label>
                         <label>Home appreciation (%)
-                            <input name="home_appreciation_rate" type="number" step="0.1" value="0.0" required>
+                            <input name="home_appreciation_rate" type="number" step="0.1" value="2.0" required>
                         </label>
                     </div>
                 </div>
@@ -113,6 +116,7 @@
                 <!-- Results Scenario 1 -->
                 <div class="scenario-block">
                     <div class="scenario-title">Mortgage Principal: <span id="s1-principal-title"></span></div>
+                    <div id="wealth-plot-1" style="width:100%;height:350px;"></div>
 
                     <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; opacity: 0.8;">Monthly</h4>
                     <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
@@ -165,18 +169,22 @@
                             <span class="label">Fees paid</span>
                             <span class="value" style="color: var(--secondary);" id="s1-total-fees"></span>
                         </div>
+                        <div class="card" title="One-time buying fees paid upfront.">
+                            <span class="label">Buying Fees</span>
+                            <span class="value" style="color: var(--secondary);" id="s1-buying-fees"></span>
+                        </div>
                         <div class="card" title="Total gains from the investment portfolio (compounded returns).">
                             <span class="label">Investments Gain</span>
                             <span class="value" style="color: var(--success);" id="s1-total-invest-gain"></span>
                         </div>
                     </div>
 
-                    <div id="wealth-plot-1" style="width:100%;height:350px;"></div>
                 </div>
 
                 <!-- Results Scenario 2 -->
                 <div class="scenario-block">
                     <div class="scenario-title">Mortgage Principal: <span id="s2-principal-title"></span></div>
+                    <div id="wealth-plot-2" style="width:100%;height:350px;"></div>
 
                     <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; opacity: 0.8;">Monthly</h4>
                     <div class="summary-cards" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
@@ -229,13 +237,16 @@
                             <span class="label">Fees paid</span>
                             <span class="value" style="color: var(--secondary);" id="s2-total-fees"></span>
                         </div>
+                        <div class="card" title="One-time buying fees paid upfront.">
+                            <span class="label">Buying Fees</span>
+                            <span class="value" style="color: var(--secondary);" id="s2-buying-fees"></span>
+                        </div>
                         <div class="card" title="Total gains from the investment portfolio (compounded returns).">
                             <span class="label">Investments Gain</span>
                             <span class="value" style="color: var(--success);" id="s2-total-invest-gain"></span>
                         </div>
                     </div>
 
-                    <div id="wealth-plot-2" style="width:100%;height:350px;"></div>
                 </div>
             </div>
 
@@ -275,6 +286,7 @@
 
                     try {
                         const homeCost = cleanMoney(data.home_cost);
+                        const buyingFees = cleanMoney(data.buying_fees);
                         const savings = cleanMoney(data.savings);
                         const years = parseInt(data.years, 10);
                         const investmentRate = parseFloat(data.investment_rate);
@@ -287,8 +299,8 @@
                         const s1MonthlyFees = cleanMoney(data.s1_monthly_fees);
                         const s2MonthlyFees = cleanMoney(data.s2_monthly_fees);
 
-                        const result1 = simulateMortgage(homeCost, s1DownPayment, s1AnnualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate, s1MonthlyFees);
-                        const result2 = simulateMortgage(homeCost, s2DownPayment, s2AnnualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate, s2MonthlyFees);
+                        const result1 = simulateMortgage(homeCost, s1DownPayment, s1AnnualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate, s1MonthlyFees, buyingFees);
+                        const result2 = simulateMortgage(homeCost, s2DownPayment, s2AnnualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate, s2MonthlyFees, buyingFees);
 
                         document.getElementById('error-msg').style.display = 'none';
                         document.getElementById('result-section').style.display = 'block';
@@ -330,6 +342,7 @@
                     // Total Flows
                     document.getElementById(`${prefix}-total-interest`).innerText = formatK(result.total_interest);
                     document.getElementById(`${prefix}-total-fees`).innerText = formatK(result.total_fees);
+                    document.getElementById(`${prefix}-buying-fees`).innerText = formatK(result.buying_fees);
                     document.getElementById(`${prefix}-total-invest-gain`).innerText = formatK(finalState.investment_gains);
                     document.getElementById(`${prefix}-total-cash-injected`).innerText = formatK(finalState.total_cash_injected);
                 }
@@ -348,7 +361,7 @@
                         };
                     }
 
-                    const createIndividualPlot = (id, data, title, yMax) => {
+                    const createIndividualPlot = (id, data, yMax) => {
                         const currentColors = getThemeColors();
                         const traceInvestedCash = {
                             x: periods, y: data.map(row => row.invested_cash_net),
@@ -372,7 +385,6 @@
                             paper_bgcolor: 'rgba(0,0,0,0)',
                             plot_bgcolor: 'rgba(0,0,0,0)',
                             font: { family: 'Inter' },
-                            title: { text: title, font: { size: 16, color: currentColors.text } },
                             xaxis: { title: 'Months', gridcolor: currentColors.grid, tickfont: { color: currentColors.muted } },
                             yaxis: {
                                 tickprefix: '€',
@@ -392,8 +404,8 @@
                     const maxWealth2 = s2.length > 0 ? s2[s2.length - 1].combined_wealth : 0;
                     const commonYMax = Math.max(maxWealth1, maxWealth2);
 
-                    createIndividualPlot('wealth-plot-1', s1, 'Wealth Decomposition (Scenario 1)', commonYMax);
-                    createIndividualPlot('wealth-plot-2', s2, 'Wealth Decomposition (Scenario 2)', commonYMax);
+                    createIndividualPlot('wealth-plot-1', s1, commonYMax);
+                    createIndividualPlot('wealth-plot-2', s2, commonYMax);
                 }
                 // Trigger initial simulation on page load
                 form.dispatchEvent(new Event('submit', { cancelable: true }));
