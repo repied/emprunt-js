@@ -361,6 +361,19 @@
                         };
                     }
 
+                    // Calculate common Y axis range
+                    const maxAssets1 = Math.max(...result1.schedule.map(r => r.current_home_value + r.investment_portfolio), result1.savings);
+                    const maxAssets2 = Math.max(...result2.schedule.map(r => r.current_home_value + r.investment_portfolio), result2.savings);
+                    const maxAsset = Math.max(maxAssets1, maxAssets2);
+
+                    const minLiab1 = Math.min(...result1.schedule.map(r => -r.balance), 0);
+                    const minLiab2 = Math.min(...result2.schedule.map(r => -r.balance), 0);
+                    const minLiab = Math.min(minLiab1, minLiab2);
+
+                    // Add 5% padding
+                    const yMax = maxAsset * 1.05;
+                    const yMin = minLiab * 1.05;
+
                     const createIndividualPlot = (id, result) => {
                         const currentColors = getThemeColors();
                         const schedule = result.schedule;
@@ -415,6 +428,7 @@
                             font: { family: 'Inter' },
                             // xaxis: { title: 'Months', gridcolor: currentColors.grid, tickfont: { color: currentColors.muted } },
                             yaxis: {
+                                range: [yMin, yMax],
                                 tickprefix: '€',
                                 exponentformat: 'SI',
                                 gridcolor: currentColors.grid,
