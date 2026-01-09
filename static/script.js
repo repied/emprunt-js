@@ -1,4 +1,4 @@
-function simulateMortgage(homeCost, downPayment, annualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate, paymentsPerYear = 12) {
+function simulateMortgage(homeCost, downPayment, annualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate, monthlyFees = 0, paymentsPerYear = 12) {
     const principal = homeCost - downPayment;
     if (principal < 0) {
         throw new Error("Down payment cannot exceed home cost");
@@ -19,8 +19,8 @@ function simulateMortgage(homeCost, downPayment, annualRate, years, savings, inv
         payment = principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
     }
 
-    if (payment > monthlyCash) {
-        throw new Error(`Monthly payment (€${payment.toLocaleString(undefined, { maximumFractionDigits: 0 })}) exceeds monthly cash (€${monthlyCash.toLocaleString(undefined, { maximumFractionDigits: 0 })})`);
+    if (payment + monthlyFees > monthlyCash) {
+        throw new Error(`Monthly payment (€${payment.toLocaleString(undefined, { maximumFractionDigits: 0 })}) + fees (€${monthlyFees.toLocaleString(undefined, { maximumFractionDigits: 0 })}) exceeds monthly cash (€${monthlyCash.toLocaleString(undefined, { maximumFractionDigits: 0 })})`);
     }
 
     if (savings < downPayment) {
@@ -31,6 +31,7 @@ function simulateMortgage(homeCost, downPayment, annualRate, years, savings, inv
     let portfolioCapital = investmentPortfolio;
     let balance = principal;
     let cumulativeInterest = 0.0;
+    let cumulativeFees = 0.0;
     let currentHomeValue = homeCost;
     const schedule = [];
 
@@ -43,8 +44,10 @@ function simulateMortgage(homeCost, downPayment, annualRate, years, savings, inv
         const principalPaid = Math.min(balance, payment - interest);
         balance = Math.max(0.0, balance - principalPaid);
 
+        cumulativeFees += monthlyFees;
+
         const investmentReturn = investmentPortfolio * invR;
-        const leftoverCash = monthlyCash - payment;
+        const leftoverCash = monthlyCash - payment - monthlyFees;
         investmentPortfolio += investmentReturn + leftoverCash;
         portfolioCapital += leftoverCash;
 
@@ -83,8 +86,10 @@ function simulateMortgage(homeCost, downPayment, annualRate, years, savings, inv
         investment_rate: investmentRate,
         monthly_cash: monthlyCash,
         home_appreciation_rate: homeAppreciationRate,
+        monthly_fees: monthlyFees,
         payment: parseFloat(payment.toFixed(2)),
         total_interest: parseFloat(cumulativeInterest.toFixed(2)),
+        total_fees: parseFloat(cumulativeFees.toFixed(2)),
         schedule: schedule,
     };
 }

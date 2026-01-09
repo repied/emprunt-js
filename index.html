@@ -74,6 +74,9 @@
                             <label>Mortgage rate (%)
                                 <input name="s1_annual_rate" type="number" step="0.01" value="2.8" required>
                             </label>
+                            <label>Monthly fees (€)
+                                <input name="s1_monthly_fees" type="text" value="0" required>
+                            </label>
                         </div>
                     </div>
 
@@ -86,6 +89,9 @@
                             </label>
                             <label>Mortgage rate (%)
                                 <input name="s2_annual_rate" type="number" step="0.01" value="3.05" required>
+                            </label>
+                            <label>Monthly fees (€)
+                                <input name="s2_monthly_fees" type="text" value="0" required>
                             </label>
                         </div>
                     </div>
@@ -116,6 +122,10 @@
                             title="The total sum of all interest payments made to the bank over the full duration of the mortgage.">
                             <span class="label">Total Interest Cost</span>
                             <span class="value" style="color: var(--secondary);" id="s1-total-interest"></span>
+                        </div>
+                        <div class="card" title="Total sum of monthly fees paid over the duration.">
+                            <span class="label">Total Fees</span>
+                            <span class="value" style="color: var(--secondary);" id="s1-total-fees"></span>
                         </div>
                         <div class="card" title="Total gains from the investment portfolio (compounded returns).">
                             <span class="label">Investments gain</span>
@@ -156,6 +166,10 @@
                             title="The total sum of all interest payments made to the bank over the full duration of the mortgage.">
                             <span class="label">Total Interest Cost</span>
                             <span class="value" style="color: var(--secondary);" id="s2-total-interest"></span>
+                        </div>
+                        <div class="card" title="Total sum of monthly fees paid over the duration.">
+                            <span class="label">Total Fees</span>
+                            <span class="value" style="color: var(--secondary);" id="s2-total-fees"></span>
                         </div>
                         <div class="card" title="Total gains from the investment portfolio (compounded returns).">
                             <span class="label">Investments gain</span>
@@ -230,9 +244,11 @@
                         const s2DownPayment = cleanMoney(data.s2_down_payment);
                         const s1AnnualRate = parseFloat(data.s1_annual_rate);
                         const s2AnnualRate = parseFloat(data.s2_annual_rate);
+                        const s1MonthlyFees = cleanMoney(data.s1_monthly_fees);
+                        const s2MonthlyFees = cleanMoney(data.s2_monthly_fees);
 
-                        const result1 = simulateMortgage(homeCost, s1DownPayment, s1AnnualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate);
-                        const result2 = simulateMortgage(homeCost, s2DownPayment, s2AnnualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate);
+                        const result1 = simulateMortgage(homeCost, s1DownPayment, s1AnnualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate, s1MonthlyFees);
+                        const result2 = simulateMortgage(homeCost, s2DownPayment, s2AnnualRate, years, savings, investmentRate, monthlyCash, homeAppreciationRate, s2MonthlyFees);
 
                         document.getElementById('error-msg').style.display = 'none';
                         document.getElementById('result-section').style.display = 'block';
@@ -260,6 +276,7 @@
                     document.getElementById(`${prefix}-principal-title`).innerText = formatCurrency(result.principal);
                     document.getElementById(`${prefix}-monthly-payment`).innerText = formatCurrency(result.payment);
                     document.getElementById(`${prefix}-total-interest`).innerText = formatK(result.total_interest);
+                    document.getElementById(`${prefix}-total-fees`).innerText = formatK(result.total_fees);
                     document.getElementById(`${prefix}-investment-gains`).innerText = formatK(result.schedule[result.schedule.length - 1].investment_gains);
                     document.getElementById(`${prefix}-final-home-value`).innerText = formatK(result.schedule[result.schedule.length - 1].current_home_value);
                     document.getElementById(`${prefix}-final-wealth`).innerText = formatK(result.schedule[result.schedule.length - 1].combined_wealth);
