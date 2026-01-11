@@ -29,11 +29,13 @@
         <span class="moon">🌙</span>
     </button>
     <header>
-        <h1>Emprunt</h1>
-        <p>
-            Initial savings are split between down payment and investments and initial fees.<br>
-            Monthly cash is split between mortgage repayments and new investment and ongoing fees.
-        </p>
+        <h1 id="help-trigger">Emprunt&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg></h1>
     </header>
 
     <main>
@@ -253,9 +255,38 @@
 
         </section>
 
+        <div id="help-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="close-modal">&times;</span>
+                <p><strong>How to choose your down payment?</strong></p>
+                <p>A large down payment lowers monthly payments and the total cost of the loan.<br>
+                    A small down payment lets you keep your savings invested, but can lead to
+                    large monthly payments, leaving little room for new investments in the years ahead.</p>
+                <p>Ultimately, if investments earn more (in %, after taxes and assuming they are risk-free!) than the
+                    loan rate, making a small down payment is advantageous.</p>
+                <p>The tool assumes:</p>
+                <ul>
+                    <li>Initial savings are split between the loan, buying fees (taxes, fees,etc.), and investments.
+                    </li>
+                    <li>During the loan, each month the cash left after paying the mortgage and fees (insurance, fees,
+                        taxes, etc.) is invested.</li>
+                </ul>
+            </div>
+        </div>
+
         <script src="static/script.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+                // Modal Logic
+                const modal = document.getElementById('help-modal');
+                const trigger = document.getElementById('help-trigger');
+                const closeBtn = document.getElementById('close-modal');
+
+                trigger.addEventListener('click', () => modal.style.display = 'block');
+                trigger.addEventListener('mouseover', () => modal.style.display = 'block');
+                closeBtn.addEventListener('click', () => modal.style.display = 'none');
+                window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
                 // Theme Toggle Logic
                 const toggle = document.getElementById('theme-toggle');
                 toggle.addEventListener('click', () => {
